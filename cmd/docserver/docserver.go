@@ -48,7 +48,7 @@ func registerHandler(conf *config) {
 
 	// handle notify
 	http.HandleFunc("/notify", func(writer http.ResponseWriter, request *http.Request) {
-		if request.Method != http.MethodGet {
+		if request.Method != http.MethodPost {
 			return
 		}
 		token := request.FormValue("token")
@@ -56,6 +56,7 @@ func registerHandler(conf *config) {
 			writer.WriteHeader(http.StatusForbidden)
 			return
 		}
+		log.Println("update document from:", request.RemoteAddr)
 		delayNotify()
 	})
 
