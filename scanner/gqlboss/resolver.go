@@ -3,6 +3,7 @@ package gqlboss
 import (
 	"errors"
 	"fmt"
+	"github.com/thewinds/mkdoc/scanner/util"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -122,7 +123,7 @@ func (g *gqlFieldParser) assertGraphQLFieldElts(exprs []ast.Expr) ([]ast.Expr, b
 
 func (g *gqlFieldParser) getAnnotationFromCode() string {
 	sb := strings.Builder{}
-	code := readCode(g.FileSet, g.AST[0])
+	code := util.ReadCode(g.FileSet, g.AST[0])
 	lines := strings.Split(code, "\n")
 	for k, line := range lines {
 		if strings.Contains(line, "@") {

@@ -2,9 +2,9 @@ package gqlboss
 
 import (
 	"fmt"
+	"github.com/thewinds/mkdoc/scanner/util"
 	"go/ast"
 	"go/token"
-	"io/ioutil"
 	"regexp"
 	"strings"
 
@@ -93,9 +93,9 @@ func (s *Scanner) walkNode(node ast.Node) bool {
 		if kvExpr.Key == nil || kvExpr.Value == nil {
 			return true
 		}
-		name := readCode(s.fileSet, kvExpr.Key)
+		name := util.ReadCode(s.fileSet, kvExpr.Key)
 		if strings.HasPrefix(name, "\"") && strings.HasSuffix(name, "\"") {
-			value := readCode(s.fileSet, kvExpr.Value)
+			value := util.ReadCode(s.fileSet, kvExpr.Value)
 			if strings.HasSuffix(value, "Field()") {
 				funcName := value[:len(value)-2]
 				opName := name[1:]
@@ -111,13 +111,13 @@ func (s *Scanner) walkNode(node ast.Node) bool {
 		if funcDecl.Type.Results == nil {
 			return false
 		}
-		retTypeName := readCode(s.fileSet, funcDecl.Type.Results)
+		retTypeName := util.ReadCode(s.fileSet, funcDecl.Type.Results)
 		switch retTypeName {
 		case "*graphql.Field":
 			stmts := funcDecl.Body.List
 			for _, stmt := range stmts {
 				if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
-					code := readCode(s.fileSet, returnStmt)
+					code := util.ReadCode(s.fileSet, returnStmt)
 					if !strings.Contains(code, "@doc") {
 						continue
 					}
@@ -192,12 +192,4 @@ func (s *Scanner) scanAnnotations() ([]DocAnnotation, error) {
 	}
 	return annotations, nil
 
-}
-
-// readCode read source code from ast.Node
-func readCode(f *token.FileSet, node ast.Node) string {
-	ps := f.Position(node.Pos())
-	pe := f.Position(node.End())
-	file, _ := ioutil.ReadFile(ps.Filename)
-	return string(file[ps.Offset:pe.Offset])
 }
